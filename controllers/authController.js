@@ -54,47 +54,75 @@ const register = asyncHandler(async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  // Check for user
-  const user = await User.findOne({ 
-    where: { email },
-    include: [{
-      model: College,
-      as: 'college',
-      attributes: ['id', 'name', 'code']
-    }]
-  });
+    console.log('[LOGIN] Attempt for email:', email);
 
-  if (!user) {
-    return errorResponse(res, 'Invalid credentials', 401);
+    // Validate input
+    if (!email || !password) {
+      console.log('[LOGIN] Missing email or password');
+      return errorResponse(res, 'Email and password are required', 400);
+    }
+
+    // Check JWT_SECRET is configured
+    if (!process.env.JWT_SECRET) {
+      console.error('[LOGIN] JWT_SECRET not configured!');
+      return errorResponse(res, 'Server configuration error', 500);
+    }
+
+    // Check for user
+    const user = await User.findOne({ 
+      where: { email },
+      include: [{
+        model: College,
+        as: 'college',
+        attributes: ['id', 'name', 'code']
+      }]
+    });
+
+    if (!user) {
+      console.log('[LOGIN] User not found:', email);
+      return errorResponse(res, 'Invalid credentials', 401);
+    }
+
+    console.log('[LOGIN] User found:', user.id, 'Status:', user.status);
+
+    // Check if user is active
+    if (user.status !== 'active') {
+      console.log('[LOGIN] User not active:', email);
+      return errorResponse(res, 'Account is not active', 401);
+    }
+
+    // Check password
+    const isMatch = await comparePassword(password, user.password);
+    if (!isMatch) {
+      console.log('[LOGIN] Password mismatch for:', email);
+      return errorResponse(res, 'Invalid credentials', 401);
+    }
+
+    console.log('[LOGIN] Password matched, generating token');
+
+    // Update last login
+    await user.update({ lastLogin: new Date() });
+
+    // Generate token
+    const token = generateToken({ id: user.id });
+
+    console.log('[LOGIN] Token generated successfully');
+
+    // Remove password from response
+    const userResponse = { ...user.toJSON() };
+    delete userResponse.password;
+
+    successResponse(res, {
+      token,
+      user: userResponse,
+    }, 'Login successful');
+  } catch (error) {
+    console.error('[LOGIN] Unexpected error:', error.message, error.stack);
+    return errorResponse(res, 'Login failed: ' + error.message, 500);
   }
-
-  // Check if user is active
-  if (user.status !== 'active') {
-    return errorResponse(res, 'Account is not active', 401);
-  }
-
-  // Check password
-  const isMatch = await comparePassword(password, user.password);
-  if (!isMatch) {
-    return errorResponse(res, 'Invalid credentials', 401);
-  }
-
-  // Update last login
-  await user.update({ lastLogin: new Date() });
-
-  // Generate token
-  const token = generateToken({ id: user.id });
-
-  // Remove password from response
-  const userResponse = { ...user.toJSON() };
-  delete userResponse.password;
-
-  successResponse(res, {
-    token,
-    user: userResponse,
-  }, 'Login successful');
 });
 
 // @desc    Get current user
