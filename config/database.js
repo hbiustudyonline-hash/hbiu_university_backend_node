@@ -30,7 +30,13 @@ const sequelize = new Sequelize(
 // Test database connection
 const connectDB = async () => {
   try {
-    await sequelize.authenticate();
+    // Add timeout for connection attempts
+    const connectionPromise = sequelize.authenticate();
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Database connection timeout after 10 seconds')), 10000)
+    );
+
+    await Promise.race([connectionPromise, timeoutPromise]);
     console.log('✅ PostgreSQL database connected successfully');
     
     // Sync all models
@@ -55,8 +61,13 @@ const connectDB = async () => {
       await sequelize.sync({ alter: false, force: false });
     }
   } catch (error) {
-    console.error('❌ Unable to connect to the database:', error);
-    process.exit(1);
+    console.warn('⚠️ Database connection warning:', error.message);
+    console.warn('⚠️ Server will start but database features may be unavailable');
+    // Don't exit - allow server to start for development/debugging
+    if (process.env.NODE_ENV === 'production') {
+      console.error('❌ Production requires database connection');
+      process.exit(1);
+    }
   }
 };
 
