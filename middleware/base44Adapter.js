@@ -1,8 +1,8 @@
 /**
- * Base44 SDK Adapter Middleware
- * Transforms standard Express routes to Base44 SDK-compatible format
- * 
- * Base44 SDK expects:
+ * HBIU Virtual Campus SDK Adapter Middleware
+ * Transforms standard Express routes to SDK-compatible format
+ *
+ * HBIU Virtual Campus expects:
  * - Entity operations via /api/entities/:entityName
  * - Standardized methods: list, get, filter, create, update, delete
  * - Auth operations via /api/auth

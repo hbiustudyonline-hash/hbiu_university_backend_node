@@ -1,6 +1,6 @@
 /**
- * Base44 SDK Entity Routes
- * Provides RESTful API endpoints compatible with Base44 SDK
+ * HBIU Virtual Campus Entity Routes
+ * Provides RESTful API endpoints for entity management
  */
 
 const express = require('express');
@@ -50,7 +50,7 @@ router.get('/:entity', async (req, res) => {
 
     const { sort = '-createdAt', limit = 100 } = req.query;
 
-    // Parse sort direction (Base44 uses '-field' for DESC)
+    // Parse sort direction (HBIU Virtual Campus uses '-field' for DESC)
     const sortField = sort.startsWith('-') ? sort.substring(1) : sort;
     const sortDir = sort.startsWith('-') ? 'DESC' : 'ASC';
 

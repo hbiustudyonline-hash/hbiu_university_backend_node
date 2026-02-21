@@ -68,8 +68,12 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/courses', require('./routes/courses'));
 app.use('/api/colleges', require('./routes/colleges'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/assignments', require('./routes/assignments'));
+app.use('/api/submissions', require('./routes/submissions'));
+app.use('/api/enrollments', require('./routes/enrollments'));
+app.use('/api/announcements', require('./routes/announcements'));
 
-// Base44 SDK compatible entity routes
+// HBIU Virtual Campus entity routes
 app.use('/api/entities', require('./routes/entities'));
 
 // Welcome route
