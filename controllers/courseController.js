@@ -124,20 +124,20 @@ const createCourse = asyncHandler(async (req, res) => {
   const courseData = {
     ...req.body,
     lecturerId: lecturerId,
-    collegeId: null, // Set to null since we're using collegeName for now
-    collegeName: req.body.college_name || req.body.collegeName || null,
-    programLevel: req.body.program || req.body.programLevel || null,
-    degreeProgram: req.body.degree_program || req.body.degreeProgram || null,
+    collegeId: null,
     duration: req.body.duration || 16 // Default to 16 weeks (one semester)
   };
 
-  // Remove frontend-only fields
+  // Remove frontend-only fields that don't exist in database
   delete courseData.instructor;
   delete courseData.instructor_name;
   delete courseData.college_name;
   delete courseData.college_id;
+  delete courseData.collegeName;
   delete courseData.program;
+  delete courseData.programLevel;
   delete courseData.degree_program;
+  delete courseData.degreeProgram;
   delete courseData.semester;
 
   console.log('📝 Final course data to save:', JSON.stringify(courseData, null, 2));

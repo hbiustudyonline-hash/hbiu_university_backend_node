@@ -103,24 +103,6 @@ const Course = sequelize.define('Course', {
       key: 'id'
     }
   },
-  collegeName: {
-    type: DataTypes.STRING(200),
-    allowNull: true,
-    field: 'college_name',
-    comment: 'College/Department name for display'
-  },
-  programLevel: {
-    type: DataTypes.STRING(50),
-    allowNull: true,
-    field: 'program_level',
-    comment: 'Program level: Bachelor, Master, etc.'
-  },
-  degreeProgram: {
-    type: DataTypes.STRING(500),
-    allowNull: true,
-    field: 'degree_program',
-    comment: 'Full degree program name'
-  },
   lecturerId: {
     type: DataTypes.INTEGER,
     allowNull: true,
