@@ -41,20 +41,16 @@ const connectDB = async () => {
     
     // Sync all models
     if (process.env.NODE_ENV === 'development') {
-      // Check if we should force recreate tables
+      // Check if we should force recreate tables (ONLY if explicitly set)
       if (process.env.DB_FORCE_SYNC === 'true') {
+        console.log('⚠️ WARNING: DB_FORCE_SYNC is true - ALL DATA WILL BE DELETED!');
         await sequelize.sync({ force: true, alter: false });
         console.log('📊 Database models synchronized (forced recreation)');
       } else {
-        try {
-          // Try to sync with alter mode (safer, modifies existing schema)
-          await sequelize.sync({ alter: true, force: false });
-          console.log('📊 Database models synchronized (alter mode)');
-        } catch (syncError) {
-          console.log('⚠️ Alter sync failed, trying force sync...');
-          await sequelize.sync({ force: true, alter: false });
-          console.log('📊 Database models synchronized (force recreation after error)');
-        }
+        // NEVER force sync automatically - this preserves data
+        // Just sync without altering to preserve existing data
+        await sequelize.sync({ alter: false, force: false });
+        console.log('📊 Database models synchronized (preserving existing data)');
       }
     } else {
       // Production: sync without altering or forcing
