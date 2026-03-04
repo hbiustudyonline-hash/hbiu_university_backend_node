@@ -143,7 +143,7 @@ const deleteCollege = asyncHandler(async (req, res) => {
 // @route   GET /api/colleges/:id/courses
 // @access  Public
 const getCollegeCourses = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 12, search, level, status } = req.query;
+  const { page = 1, limit = 999999, search, level, status } = req.query;
   const { offset, limit: limitNum } = paginate(page, limit);
 
   // Check if college exists

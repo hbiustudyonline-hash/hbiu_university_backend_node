@@ -6,7 +6,7 @@ const { Op } = require('sequelize');
 // @route   GET /api/courses
 // @access  Public
 const getCourses = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 12, search, category, level, status, collegeId } = req.query;
+  const { page = 1, limit = 999999, search, category, level, status, collegeId } = req.query;
   const { offset, limit: limitNum } = paginate(page, limit);
 
   // Build where clause
@@ -47,10 +47,20 @@ const getCourses = asyncHandler(async (req, res) => {
     limit: limitNum,
   });
 
+  // Add snake_case aliases for compatibility
+  const coursesWithAliases = courses.map(course => {
+    const courseData = course.toJSON();
+    return {
+      ...courseData,
+      college_id: courseData.collegeId,
+      lecturer_id: courseData.lecturerId,
+    };
+  });
+
   const pagination = getPaginationMeta(count, page, limitNum);
 
   successResponse(res, {
-    courses,
+    courses: coursesWithAliases,
     pagination
   }, 'Courses retrieved successfully');
 });
