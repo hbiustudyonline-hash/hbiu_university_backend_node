@@ -109,31 +109,60 @@ const getCourse = asyncHandler(async (req, res) => {
 // @route   POST /api/courses
 // @access  Private/Lecturer
 const createCourse = asyncHandler(async (req, res) => {
+  console.log('📚 Creating course with data:', JSON.stringify(req.body, null, 2));
+  
+  // Handle instructor assignment (for admins)
+  let lecturerId = req.user.id;
+  if (req.user.role === 'admin' && req.body.instructor) {
+    // Admin is assigning a lecturer by email
+    const lecturer = await User.findOne({ where: { email: req.body.instructor } });
+    if (lecturer) {
+      lecturerId = lecturer.id;
+    }
+  }
+
   const courseData = {
     ...req.body,
-    lecturerId: req.user.id,
-    collegeId: req.user.collegeId || req.body.collegeId
+    lecturerId: lecturerId,
+    collegeId: req.user.collegeId || req.body.collegeId || req.body.college_id || null,
+    duration: req.body.duration || 16 // Default to 16 weeks (one semester)
   };
 
-  const course = await Course.create(courseData);
+  // Remove frontend-only fields
+  delete courseData.instructor;
+  delete courseData.instructor_name;
+  delete courseData.college_name;
+  delete courseData.degreeProgram;
+  delete courseData.semester;
 
-  // Get course with relations
-  const newCourse = await Course.findByPk(course.id, {
-    include: [
-      {
-        model: User,
-        as: 'lecturer',
-        attributes: ['id', 'firstName', 'lastName', 'email']
-      },
-      {
-        model: College,
-        as: 'college',
-        attributes: ['id', 'name', 'code']
-      }
-    ]
-  });
+  console.log('📝 Final course data to save:', JSON.stringify(courseData, null, 2));
 
-  successResponse(res, newCourse, 'Course created successfully', 201);
+  try {
+    const course = await Course.create(courseData);
+    console.log('✅ Course created successfully with ID:', course.id);
+
+    // Get course with relations
+    const newCourse = await Course.findByPk(course.id, {
+      include: [
+        {
+          model: User,
+          as: 'lecturer',
+          attributes: ['id', 'firstName', 'lastName', 'email']
+        },
+        {
+          model: College,
+          as: 'college',
+          attributes: ['id', 'name', 'code']
+        }
+      ]
+    });
+
+    successResponse(res, newCourse, 'Course created successfully', 201);
+  } catch (error) {
+    console.error('❌ Course creation error:', error.message);
+    console.error('Error details:', error);
+    throw error;
+  }
 });
 
 // @desc    Update course

@@ -5,7 +5,9 @@ const { errorResponse } = require('../utils/response');
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return errorResponse(res, 'Validation failed', 400, errors.array());
+    const errorMessages = errors.array().map(err => `${err.path}: ${err.msg}`).join(', ');
+    console.error('Validation errors:', errorMessages);
+    return errorResponse(res, `Validation failed: ${errorMessages}`, 400, errors.array());
   }
   next();
 };
@@ -86,10 +88,9 @@ const validateCourse = [
   body('code')
     .notEmpty()
     .withMessage('Course code is required')
-    .isLength({ min: 3, max: 20 })
-    .withMessage('Course code must be between 3 and 20 characters')
-    .matches(/^[A-Z0-9]+$/)
-    .withMessage('Course code must contain only uppercase letters and numbers'),
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Course code must be between 2 and 50 characters')
+    .trim(),
   
   body('description')
     .optional()
@@ -101,6 +102,7 @@ const validateCourse = [
     .withMessage('Credits must be between 1 and 10'),
   
   body('duration')
+    .optional()
     .isInt({ min: 1 })
     .withMessage('Duration must be a positive number'),
   

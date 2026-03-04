@@ -20,11 +20,11 @@ const Course = sequelize.define('Course', {
     allowNull: true
   },
   code: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(50),
     allowNull: false,
     unique: true,
     validate: {
-      len: [3, 20]
+      len: [2, 50]
     }
   },
   credits: {
