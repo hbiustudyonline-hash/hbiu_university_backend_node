@@ -124,7 +124,10 @@ const createCourse = asyncHandler(async (req, res) => {
   const courseData = {
     ...req.body,
     lecturerId: lecturerId,
-    collegeId: req.user.collegeId || req.body.collegeId || req.body.college_id || null,
+    collegeId: null, // Set to null since we're using collegeName for now
+    collegeName: req.body.college_name || req.body.collegeName || null,
+    programLevel: req.body.program || req.body.programLevel || null,
+    degreeProgram: req.body.degree_program || req.body.degreeProgram || null,
     duration: req.body.duration || 16 // Default to 16 weeks (one semester)
   };
 
@@ -132,7 +135,9 @@ const createCourse = asyncHandler(async (req, res) => {
   delete courseData.instructor;
   delete courseData.instructor_name;
   delete courseData.college_name;
-  delete courseData.degreeProgram;
+  delete courseData.college_id;
+  delete courseData.program;
+  delete courseData.degree_program;
   delete courseData.semester;
 
   console.log('📝 Final course data to save:', JSON.stringify(courseData, null, 2));
